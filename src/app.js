@@ -23,24 +23,51 @@ app.get("/users/:userId", (req, res, next) => {
   const { userId } = req.params;
   const foundUser = users.find((user) => user.id === Number(userId));
 
-  const userDetail = JSON.stringify(foundUser);
-  res.status(200);
-  res.set("Content-Type", "application/json");
-  res.send({ data: userDetail });
-
+  if (foundUser) {
+    res.json({ data: foundUser });
+  } else {
+    next(`User ID not found: ${userId}`);
+  }
 });
 
-// // TODO: return all states from /states in the form of { data: Array }
-// app.get;
+// Return all states from /states in the form of { data: Array }
+app.get("/states", (req, res) => {
+  res.json({ data: states });
+});
 
-// // TODO: Return a single state from /states/:stateCode in the form of { data: { stateCode: String, name: String } }
-// app.get;
+// Return a single state from /states/:stateCode in the form of { data: { stateCode: String, name: String } }
+app.get("/states/:stateCode", (req, res, next) => {
+  const { stateCode } = req.params;
+
+  if (stateCode in states) {
+    console.log(
+      `{data: { 'stateCode': ${stateCode}, 'name': ${states[stateCode]}}}`
+    );
+    res.json({
+      data: {
+        stateCode: stateCode,
+        name: states[stateCode],
+      },
+    });
+  } else {
+    next(`State code not found: ${stateCode}`);
+  }
+});
 
 // Not-found handler
 app.use((req, res, next) => {
   res.send(`Not found: ${req.originalUrl}`);
 });
-// // TODO: Add error handler
-// app.use;
+
+// Add error handler
+app.use((err, req, res, next) => {
+  console.log(err);
+  res.send(err);
+});
 
 module.exports = app;
+
+// const userDetail = JSON.stringify(foundUser);
+// res.status(200);
+// res.set("Content-Type", "application/json");
+// res.send({ data: userDetail });
