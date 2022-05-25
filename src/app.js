@@ -3,51 +3,52 @@ const app = express();
 
 const notes = require("./data/notes-data");
 
-app.get("/notes/:noteId", (req, res) => {
+app.use(express.json());
+
+app.get("/notes/:noteId", (req, res, next) => {
   const noteId = Number(req.params.noteId);
   const foundNote = notes.find((note) => note.id === noteId);
   if (foundNote) {
     res.json({ data: foundNote });
   } else {
-    res.sendStatus(400);
+    next(`Note id not found: ${noteId}`);
   }
 });
 
 app.get("/notes", (req, res) => {
-  if (req) {
-    console.log(req.body);
-    res.json({ data: notes });
-  } else {
-    res.sendStatus(400);
-  }
+  res.json({ data: notes });
 });
 
 //Get the largest assigned ID;
 let lastNoteId = notes.reduce((maxId, note) => Math.max(maxId, note.id), 0);
+
 // Ability to create a new note
 app.post("/notes", (req, res, next) => {
   //validate it is an appropriate note
-  console.log(req.body);
+  // console.log(req.body);
   const { data: { text } = {} } = req.body;
   //store note in our date file
-  const newNote = {
-    id: ++lastNoteId,
-    text,
-  };
-
-  notes.push(newNote);
-  //send back JSON response
-  res.json({ data: newNote });
+  if (text) {
+    const newNote = {
+      id: ++lastNoteId,
+      text,
+    };
+    notes.push(newNote);
+    //send back JSON response
+    res.status(201).json({ data: newNote });
+  } else {
+    return res.status(400).json({ error: `Required text is missing` });
+  }
 });
 
-// Not-found handler
+// Route not-found handler
 app.use((req, res, next) => {
-  res.send(`Note id not found: ${req.params.noteId}`);
+  res.status(400).send(`Not found: ${req.originalUrl}`);
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  res.send(`Not found: ${req.originalUrl}`);
+  res.status(400).send(err);
 });
 
 module.exports = app;
