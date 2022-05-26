@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-
 const notes = require("./data/notes-data");
 
 app.use(express.json());
