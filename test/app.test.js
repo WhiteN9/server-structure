@@ -11,16 +11,20 @@ describe("App", () => {
   beforeEach(() => {
     todos.splice(0, todos.length);
   });
-  
+
   it("returns error message for a route that is not defined", async () => {
-    // Write your solution here
-    expect(1).toEqual(2);
+    const response = await request(app).get("/qwerty");
+
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect(response.text).toContain("Not found: /qwerty");
   });
 
   describe("path /todos/:todoId", async () => {
     it("returns error message for non-existent todo", async () => {
-      // Write your solution here
-      expect(1).toEqual(2);
+      const response = await request(app).get("/todos/123");
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain("Todo id not found: 123");
     });
   });
 
@@ -31,13 +35,13 @@ describe("App", () => {
           {
             id: 1,
             title: "Learn JavaScript",
-            completed: true
+            completed: true,
           },
           {
             id: 2,
             title: "Learn Node.js",
-            completed: false
-          }
+            completed: false,
+          },
         ];
 
         todos.push(...expected);
@@ -48,23 +52,39 @@ describe("App", () => {
         expect(response.body.data).toEqual(expected);
       });
     });
-    
+
     describe("POST method", () => {
       it("creates a new todo and assigns an id", async () => {
-        // Write your solution here
-        expect(1).toEqual(2);
+        const newTodo = {
+          title: "Take out the laundry",
+          completed: true,
+        };
+        const response = await request(app)
+          .post("/todos")
+          .send({ data: newTodo });
+
+        expect(response.status).toBe(201);
+        expect(response.body.data).toEqual({
+          id: 5, //
+          ...newTodo,
+        });
       });
 
       it("returns 400 if title is missing", async () => {
-        // Write your solution here
-        expect(1).toEqual(2);
+        const response = await request(app)
+          .post("/todos")
+          .send({ data: { message: "Title is missing, please" } });
+
+        expect(response.status).toBe(400);
       });
 
       it("returns 400 if title is empty", async () => {
-        // Write your solution here
-        expect(1).toEqual(2);
+        const response = await request(app)
+          .post("/todos")
+          .send({ data: { title: "" } });
+
+        expect(response.status).toBe(400);
       });
     });
-    
   });
 });
