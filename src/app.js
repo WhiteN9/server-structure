@@ -4,16 +4,40 @@ const app = express();
 const path = require("path");
 const notes = require(path.resolve("src/data/notes-data"));
 
-app.use(express.json());
-
-app.get("/notes/:noteId", (req, res) => {
+//Error-handling function to check if post request is valid
+const bodyHasTextProperty = (req, res, next) => {
+  const { data: { text } = {} } = req.body;
+  // console.log("Req body", req.body);
+  if (text) {
+    return next();
+  } else {
+    return next({
+      status: 400,
+      message: "A 'text' property is required.",
+    });
+  }
+};
+//Error-handling function to check if the note exists
+const noteExists = (req, res, next) => {
   const noteId = Number(req.params.noteId);
   const foundNote = notes.find((note) => note.id === noteId);
   if (foundNote) {
-    res.json({ data: foundNote });
+    return next();
   } else {
-    return next(`Note id not found: ${req.params.noteId}`);
+    return next({
+      status: 404,
+      message: `Note id not found: ${req.params.noteId}`,
+    });
   }
+};
+
+//Application-level middleware
+app.use(express.json());
+
+app.get("/notes/:noteId", noteExists, (req, res, next) => {
+  const noteId = Number(req.params.noteId);
+  const foundNote = notes.find((note) => note.id === noteId);
+  res.json({ data: foundNote });
 });
 
 app.get("/notes", (req, res) => {
@@ -22,29 +46,30 @@ app.get("/notes", (req, res) => {
 
 let lastNoteId = notes.reduce((maxId, note) => Math.max(maxId, note.id), 0);
 
-app.post("/notes", (req, res) => {
+app.post("/notes", bodyHasTextProperty, (req, res) => {
   const { data: { text } = {} } = req.body;
-  if (text) {
-    const newNote = {
-      id: ++lastNoteId, // Increment last id then assign as the current ID
-      text,
-    };
-    notes.push(newNote);
-    res.status(201).json({ data: newNote });
-  } else {
-    res.sendStatus(400);
-  }
+
+  const newNote = {
+    id: ++lastNoteId, // Increment last id then assign as the current ID
+    text,
+  };
+  notes.push(newNote);
+  res.status(201).json({ data: newNote });
 });
 
 // Not found handler
 app.use((req, res, next) => {
-  next(`Not found: ${req.originalUrl}`);
+  next({
+    status: 404,
+    message: `Not found: ${req.originalUrl}`,
+  });
 });
 
 // Error handler
 app.use((error, req, res, next) => {
   console.error(error);
-  res.status(500).send(error);
+  const { status = 500, message = "Error filler message." } = error;
+  res.status(status).json({ error: message });
 });
 
 module.exports = app;
