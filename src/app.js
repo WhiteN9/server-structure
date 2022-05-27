@@ -9,11 +9,9 @@ app.use("/urls", urlsRoute);
 app.use("/uses", usesRoute);
 
 //Route not found handler
-app.use((req, res, next) => {
-  next({
-    status: 404,
-    message: `Not found: ${req.originalUrl}`,
-  });
+app.use((req, res) => {
+  console.log(req.body);
+  res.status(404).send(`Not found: ${req.originalUrl}`);
 });
 
 //Error handler
