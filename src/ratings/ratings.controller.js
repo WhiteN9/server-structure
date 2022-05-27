@@ -2,20 +2,21 @@ const path = require("path");
 const ratings = require(path.resolve("src/data/ratings-data"));
 
 const list = (req, res) => {
-  //   const noteId = Number(req.params.noteId);
-  //   console.log("aaaaaaaaa", noteId);
-  //   let ratings;
-  //   if (noteId) {
-  //     ratings = ratingsData.filter((rating) => rating.noteId === noteId);
-  //   }
-  //   res.json({ data: ratings });
-
   const noteId = Number(req.params.noteId);
-  res.json({
-    data: ratings.filter(
-      noteId ? (rating) => rating.noteId === noteId : () => true
-    ),
-  });
+  console.log("aaaaaaaaa", noteId);
+  let ratingsList = ratings;
+  if (noteId) {
+    ratingsList = ratings.filter((rating) => rating.noteId === noteId);
+  }
+  res.json({ data: ratingsList });
+  
+  //alt :
+  //   const noteId = Number(req.params.noteId);
+  //   res.json({
+  //     data: ratings.filter(
+  //       noteId ? (rating) => rating.noteId === noteId : () => true
+  //     ),
+  //   });
 };
 
 const ratingExists = (req, res, next) => {
