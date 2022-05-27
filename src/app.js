@@ -10,7 +10,6 @@ app.use("/uses", usesRoute);
 
 //Route not found handler
 app.use((req, res) => {
-  console.log(req.body);
   res.status(404).send(`Not found: ${req.originalUrl}`);
 });
 
