@@ -5,15 +5,14 @@ const list = (req, res) => {
 };
 
 const read = (req, res) => {
-  const noteId = Number(req.params.noteId);
-  const foundNote = notes.find((note) => note.id === noteId);
-  res.json({ data: foundNote });
+  res.json({ data: res.locals.note });
 };
 
 const noteExists = (req, res, next) => {
   const { noteId } = req.params;
   const foundNote = notes.find((note) => note.id === Number(noteId));
   if (foundNote) {
+    res.locals.note = foundNote;
     return next();
   } else {
     return next({
@@ -46,13 +45,13 @@ const create = (req, res, next) => {
 };
 
 const update = (req, res) => {
-  const { noteId } = req.params;
-  const foundNote = notes.find((note) => note.id === Number(noteId));
+  const note = res.locals.note;
   const { data: { id, text } = {} } = req.body;
-  foundNote.id = id;
-  foundNote.text = text;
 
-  res.json({ data: foundNote });
+  note.id = id;
+  note.text = text;
+
+  res.json({ data: note });
 };
 
 const destroy = (req, res) => {
