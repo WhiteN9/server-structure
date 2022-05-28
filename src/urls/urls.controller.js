@@ -30,15 +30,15 @@ const update = (req, res) => {
 };
 
 const urlExists = (req, res, next) => {
-  const id = req.params.id;
-  const foundUrl = urls.find((url) => url.id === Number(id));
+  const urlId = req.params.urlId;
+  const foundUrl = urls.find((url) => url.id === Number(urlId));
   if (foundUrl) {
     res.locals.url = foundUrl;
     next();
   } else {
     next({
       status: 404,
-      message: `Url id not found: ${id}`,
+      message: `Url id not found: ${urlId}`,
     });
   }
 };
@@ -58,4 +58,5 @@ module.exports = {
   create: [bodyHasProperty("href"), create],
   read: [urlExists, read],
   update: [urlExists, bodyHasProperty("href"), update],
+  urlExists,
 };
