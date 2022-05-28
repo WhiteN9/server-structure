@@ -14,10 +14,16 @@ app.use((req, res, next) => {
 });
 
 //Error handler
-app.use((error, req, res, next) => {
+app.use((err, req, res, next) => {
   // console.error("error", error);
-  const { status = 500, message = `Something went wrong!` } = error;
-  res.status(status).json({ error: message });
+  const { status = 500, message = `Something went wrong!` } = err;
+  res.status(status).json({ err: message });
 });
+
+// app.use((err, req, res, next) => {
+//   console.error(err);
+//   const { status = 500, message = "Something went wrong" } = err;
+//   res.status(status).json({ error: message });
+// })
 
 module.exports = app;
