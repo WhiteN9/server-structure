@@ -9,13 +9,17 @@ const states = require("./data/states-data");
 app.use(morgan("common"));
 app.use(express.json());
 
-app.get("/", (req, res, next) => {
+app.get("/", (req, res) => {
   res.send("hello");
 });
 
 // Return an array of users from /users in form of { data: Array }
 app.get("/users", (req, res) => {
-  res.json({ data: users });
+  // res.json({ data: users });
+  // alt way:
+  res.status(200);
+  res.set("Content-Type", "application/json");
+  res.send({ data: users });
 });
 
 // Return a single user by id from /users/:userId in form of { data: Object }
@@ -24,7 +28,14 @@ app.get("/users/:userId", (req, res, next) => {
   const foundUser = users.find((user) => user.id === Number(userId));
 
   if (foundUser) {
-    res.json({ data: foundUser });
+    // res.json({ data: foundUser });
+    // alt way:
+    // const userDetail = JSON.stringify(foundUser);
+    // line 28 is not needed because
+    // we don't want to convert the object to string?
+    res.status(200);
+    res.set("Content-Type", "application/json");
+    res.send({ data: foundUser });
   } else {
     next(`User ID not found: ${userId}`);
   }
@@ -40,12 +51,12 @@ app.get("/states/:stateCode", (req, res, next) => {
   const { stateCode } = req.params;
 
   if (stateCode in states) {
-    console.log(
-      `{data: { 'stateCode': ${stateCode}, 'name': ${states[stateCode]}}}`
-    );
+    // console.log(
+    //   `{data: { 'stateCode': ${stateCode}, 'name': ${states[stateCode]}}}`
+    // );
     res.json({
       data: {
-        stateCode: stateCode,
+        stateCode,
         name: states[stateCode],
       },
     });
@@ -66,8 +77,3 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
-
-// const userDetail = JSON.stringify(foundUser);
-// res.status(200);
-// res.set("Content-Type", "application/json");
-// res.send({ data: userDetail });
